@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  test-and-review:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest requests
+
+      - name: Run pytest
+        run: pytest
+
+      - name: Generate Gemini review comment
+        if: github.event.pull_request != null
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python << 'EOF'
+          import os
+          import subprocess
+          import requests
+          import json
+
+          # Get git diff for this push
+          diff = subprocess.check_output(
+              ["git", "diff", "HEAD~1", "HEAD"],
+              text=True
+          )
+
+          if not diff.strip():
+              print("No diff detected, skipping Gemini review.")
+              exit(0)
+
+          prompt = f"""
+          You are a senior software engineer performing a code review.
+
+          Review the following git diff and respond with:
+          1. Summary of what changed
+          2. Potential issues or risks
+          3. Suggestions for improvement
+
+          Git diff:
+          {diff}
+          """
+
+          response = requests.post(
+              "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+              params={"key": os.environ["GEMINI_API_KEY"]},
+              headers={"Content-Type": "application/json"},
+              json={
+                  "contents": [
+                      {
+                          "parts": [
+                              {"text": prompt}
+                          ]
+                      }
+                  ]
+              },
+              timeout=30,
+          )
+
+          response.raise_for_status()
+          review_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+          # Post PR comment
+          repo = os.environ["GITHUB_REPOSITORY"]
+          pr_number = os.environ["GITHUB_REF"].split("/")[-1]
+
+          comment_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+
+          requests.post(
+              comment_url,
+              headers={
+                  "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+              },
+              json={"body": f"### 🤖 Gemini Code Review\n\n{review_text}"},
+          )
+
+          print("Gemini review comment posted.")
+          EOF
