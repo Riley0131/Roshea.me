@@ -52,43 +52,43 @@ jobs:
           set -euo pipefail
 
           python - <<'PY'
-          import os, json, subprocess, textwrap, urllib.request, urllib.error
+          import os, json, subprocess, urllib.request, urllib.error, secrets
 
           def sh(cmd):
-            return subprocess.check_output(cmd, text=True).strip()
+              return subprocess.check_output(cmd, text=True).strip()
 
           event = os.environ["EVENT_NAME"]
           if event == "pull_request":
-            base = os.environ["PR_BASE_SHA"]
-            head = os.environ["PR_HEAD_SHA"]
-            diff_range = f"{base}...{head}"
-            title_context = f"Pull Request diff ({diff_range})"
+              base = os.environ["PR_BASE_SHA"]
+              head = os.environ["PR_HEAD_SHA"]
+              diff_range = f"{base}...{head}"
+              title_context = f"Pull Request diff ({diff_range})"
           else:
-            before = os.environ.get("BEFORE_SHA", "")
-            after = os.environ["AFTER_SHA"]
-            # In some cases (first push) BEFORE_SHA can be all zeros
-            if before and set(before) != {"0"}:
-              diff_range = f"{before}...{after}"
-            else:
-              # fallback: show changes in the pushed commit only
-              diff_range = after
-            title_context = f"Push diff ({diff_range})"
+              before = os.environ.get("BEFORE_SHA", "")
+              after = os.environ["AFTER_SHA"]
+              # In some cases (first push) BEFORE_SHA can be all zeros
+              if before and set(before) != {"0"}:
+                  diff_range = f"{before}...{after}"
+              else:
+                  # fallback: show changes in the pushed commit only
+                  diff_range = after
+              title_context = f"Push diff ({diff_range})"
 
-          # Collect a patch-like diff (add --stat for concise context as well)
+          # Collect a patch-like diff (and a diff --stat)
           try:
-            diff = sh(["git", "diff", "--patch", "--no-color", diff_range])
+              diff = sh(["git", "diff", "--patch", "--no-color", diff_range])
           except subprocess.CalledProcessError:
-            diff = "(Unable to compute diff.)"
+              diff = "(Unable to compute diff.)"
 
           try:
-            stat = sh(["git", "diff", "--stat", "--no-color", diff_range])
+              stat = sh(["git", "diff", "--stat", "--no-color", diff_range])
           except subprocess.CalledProcessError:
-            stat = "(Unable to compute diff stats.)"
+              stat = "(Unable to compute diff stats.)"
 
           # Safety/size: cap diff payload so requests don't fail
           MAX_CHARS = 14000
           if len(diff) > MAX_CHARS:
-            diff = diff[:MAX_CHARS] + "\n\n[Diff truncated due to size limits]\n"
+              diff = diff[:MAX_CHARS] + "\n\n[Diff truncated due to size limits]\n"
 
           prompt = f"""
           You are a senior software engineer performing a change review.
@@ -113,54 +113,52 @@ jobs:
 
           api_key = os.environ.get("GEMINI_API_KEY")
           if not api_key:
-            raise SystemExit("GEMINI_API_KEY is not set. Add it as a repository secret.")
+              raise SystemExit("GEMINI_API_KEY is not set. Add it as a repository secret.")
 
           # Gemini REST call (Generative Language API v1beta)
-          # Model choices: gemini-1.5-pro (best), gemini-1.5-flash (faster/cheaper)
+          # Use a model you have enabled in your account.
           model = "gemini-2.5-flash"
           url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
           payload = {
-            "contents": [
-              {"role": "user", "parts": [{"text": prompt}]}
-            ],
-            "generationConfig": {
-              "temperature": 0.2,
-              "maxOutputTokens": 900
-            }
+              "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+              "generationConfig": {
+                  "temperature": 0.2,
+                  "maxOutputTokens": 900
+              }
           }
 
           req = urllib.request.Request(
-            url=url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST",
+              url=url,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
           )
 
           try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-              data = json.loads(resp.read().decode("utf-8"))
+              with urllib.request.urlopen(req, timeout=60) as resp:
+                  data = json.loads(resp.read().decode("utf-8"))
           except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", errors="replace")
-            raise SystemExit(f"Gemini API error: {e.code}\n{body}")
+              body = e.read().decode("utf-8", errors="replace")
+              raise SystemExit(f"Gemini API error: {e.code}\n{body}")
 
           # Extract text safely
-          text = ""
           try:
-            text = data["candidates"][0]["content"]["parts"][0]["text"]
+              text = data["candidates"][0]["content"]["parts"][0]["text"]
           except Exception:
-            text = f"Gemini response parsing failed. Raw response:\n```json\n{json.dumps(data, indent=2)[:4000]}\n```"
+              text = "Gemini response parsing failed. Raw response:\n```json\n" + json.dumps(data, indent=2)[:4000] + "\n```"
 
-          # Add a small header for traceability
           out = f"## AI Review ({model})\n\n{text}\n"
 
-          # Write to GITHUB_OUTPUT (multiline)
+          # Write to GITHUB_OUTPUT (multiline) using a random delimiter to avoid collisions
           github_output = os.environ["GITHUB_OUTPUT"]
+          delim = f"EOF_{secrets.token_hex(8)}"
           with open(github_output, "a", encoding="utf-8") as f:
-            f.write("review<<'EOF'\n")
-            f.write(out)
-            f.write("\nEOF\n")
-
+              f.write(f"review<<{delim}\n")
+              f.write(out)
+              if not out.endswith("\n"):
+                  f.write("\n")
+              f.write(f"{delim}\n")
           PY
 
       - name: Post comment (PR) or commit comment (push)
@@ -177,4 +175,13 @@ jobs:
                 issue_number: context.payload.pull_request.number,
                 body,
               });
+            } else if (context.eventName === "push") {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body,
+              });
+            } else {
+              core.info(`Unsupported event: ${context.eventName}`);
             }
