@@ -1,103 +1,180 @@
-name: CI
+# .github/workflows/ci.yml
+name: AI Review Comment
 
 on:
   push:
-    branches:
-      - "**"
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: write        # needed for commit comments on push
+  pull-requests: write   # metadata access
+  issues: write          # PR comments are issue comments
+
+concurrency:
+  group: ai-review-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test-and-review:
+  ai_review:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      pull-requests: write
+    # IMPORTANT: Secrets are not available to PRs from forks.
+    # This condition prevents failures and avoids exposing tokens in untrusted contexts.
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pytest requests
-
-      - name: Run pytest
-        run: pytest
-
-      - name: Generate Gemini review comment
-        if: github.event.pull_request != null
+      - name: Generate Gemini review from diff
+        id: gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          # push:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          # pull_request:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          python << 'EOF'
-          import os
-          import subprocess
-          import requests
-          import json
+          set -euo pipefail
 
-          # Get git diff for this push
-          diff = subprocess.check_output(
-              ["git", "diff", "HEAD~1", "HEAD"],
-              text=True
-          )
+          python - <<'PY'
+          import os, json, subprocess, textwrap, urllib.request, urllib.error
 
-          if not diff.strip():
-              print("No diff detected, skipping Gemini review.")
-              exit(0)
+          def sh(cmd):
+            return subprocess.check_output(cmd, text=True).strip()
+
+          event = os.environ["EVENT_NAME"]
+          if event == "pull_request":
+            base = os.environ["PR_BASE_SHA"]
+            head = os.environ["PR_HEAD_SHA"]
+            diff_range = f"{base}...{head}"
+            title_context = f"Pull Request diff ({diff_range})"
+          else:
+            before = os.environ.get("BEFORE_SHA", "")
+            after = os.environ["AFTER_SHA"]
+            # In some cases (first push) BEFORE_SHA can be all zeros
+            if before and set(before) != {"0"}:
+              diff_range = f"{before}...{after}"
+            else:
+              # fallback: show changes in the pushed commit only
+              diff_range = after
+            title_context = f"Push diff ({diff_range})"
+
+          # Collect a patch-like diff (add --stat for concise context as well)
+          try:
+            diff = sh(["git", "diff", "--patch", "--no-color", diff_range])
+          except subprocess.CalledProcessError:
+            diff = "(Unable to compute diff.)"
+
+          try:
+            stat = sh(["git", "diff", "--stat", "--no-color", diff_range])
+          except subprocess.CalledProcessError:
+            stat = "(Unable to compute diff stats.)"
+
+          # Safety/size: cap diff payload so requests don't fail
+          MAX_CHARS = 14000
+          if len(diff) > MAX_CHARS:
+            diff = diff[:MAX_CHARS] + "\n\n[Diff truncated due to size limits]\n"
 
           prompt = f"""
-          You are a senior software engineer performing a code review.
+          You are a senior software engineer performing a change review.
 
-          Review the following git diff and respond with:
-          1. Summary of what changed
-          2. Potential issues or risks
-          3. Suggestions for improvement
+          Provide a concise, high-signal review in Markdown with exactly these sections:
+          1) Summary of changes
+          2) Possible improvements
+          3) Alerts / potential problems
+          4) Security considerations (potential vulnerabilities introduced and mitigations)
 
-          Git diff:
+          Keep it actionable and specific. If you cannot infer something from the diff, say so.
+          Do not include sensitive secrets. Do not suggest writing malware or exploit code.
+
+          Context: {title_context}
+
+          Diff stats:
+          {stat}
+
+          Unified diff:
           {diff}
-          """
+          """.strip()
 
-          response = requests.post(
-              "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
-              params={"key": os.environ["GEMINI_API_KEY"]},
-              headers={"Content-Type": "application/json"},
-              json={
-                  "contents": [
-                      {
-                          "parts": [
-                              {"text": prompt}
-                          ]
-                      }
-                  ]
-              },
-              timeout=30,
+          api_key = os.environ.get("GEMINI_API_KEY")
+          if not api_key:
+            raise SystemExit("GEMINI_API_KEY is not set. Add it as a repository secret.")
+
+          # Gemini REST call (Generative Language API v1beta)
+          # Model choices: gemini-1.5-pro (best), gemini-1.5-flash (faster/cheaper)
+          model = "gemini-1.5-pro"
+          url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+
+          payload = {
+            "contents": [
+              {"role": "user", "parts": [{"text": prompt}]}
+            ],
+            "generationConfig": {
+              "temperature": 0.2,
+              "maxOutputTokens": 900
+            }
+          }
+
+          req = urllib.request.Request(
+            url=url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
           )
 
-          response.raise_for_status()
-          review_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+          try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+              data = json.loads(resp.read().decode("utf-8"))
+          except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")
+            raise SystemExit(f"Gemini API error: {e.code}\n{body}")
 
-          # Post PR comment
-          repo = os.environ["GITHUB_REPOSITORY"]
-          pr_number = os.environ["GITHUB_REF"].split("/")[-1]
+          # Extract text safely
+          text = ""
+          try:
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+          except Exception:
+            text = f"Gemini response parsing failed. Raw response:\n```json\n{json.dumps(data, indent=2)[:4000]}\n```"
 
-          comment_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+          # Add a small header for traceability
+          out = f"## AI Review ({model})\n\n{text}\n"
 
-          requests.post(
-              comment_url,
-              headers={
-                  "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
-                  "Accept": "application/vnd.github+json",
-              },
-              json={"body": f"### 🤖 Gemini Code Review\n\n{review_text}"},
-          )
+          # Write to GITHUB_OUTPUT (multiline)
+          github_output = os.environ["GITHUB_OUTPUT"]
+          with open(github_output, "a", encoding="utf-8") as f:
+            f.write("review<<'EOF'\n")
+            f.write(out)
+            f.write("\nEOF\n")
 
-          print("Gemini review comment posted.")
-          EOF
+          PY
+
+      - name: Post comment (PR) or commit comment (push)
+        uses: actions/github-script@v7
+        env:
+          REVIEW: ${{ steps.gemini.outputs.review }}
+        with:
+          script: |
+            const body = process.env.REVIEW || "AI Review: (no output)";
+            if (context.eventName === "pull_request") {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
