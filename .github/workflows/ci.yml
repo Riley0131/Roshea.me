@@ -117,7 +117,7 @@ jobs:
 
           # Gemini REST call (Generative Language API v1beta)
           # Model choices: gemini-1.5-pro (best), gemini-1.5-flash (faster/cheaper)
-          model = "gemini-1.5-pro"
+          model = "gemini-2.5-flash"
           url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
           payload = {
