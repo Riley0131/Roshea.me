@@ -1,99 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riley O'Shea</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --card: #111827;
-            --text: #e5e7eb;
-            --accent: #38bdf8;
-            --accent-strong: #0ea5e9;
-            --muted: #94a3b8;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 20% 20%, #1f2937, var(--bg) 35%), radial-gradient(circle at 80% 0%, #1f2937, var(--bg) 40%), var(--bg);
-            color: var(--text);
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-        }
-
-        main {
-            width: min(520px, 92vw);
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(14, 165, 233, 0.06)), var(--card);
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            border-radius: 18px;
-            padding: 36px 32px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-            text-align: center;
-            backdrop-filter: blur(6px);
-        }
-
-        h1 {
-            margin: 0 0 12px;
-            font-size: clamp(32px, 4vw, 42px);
-            letter-spacing: 0.3px;
-        }
-
-        p {
-            margin: 0 0 26px;
-            color: var(--muted);
-            font-size: 15px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        a.button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 18px;
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            text-decoration: none;
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.03);
-            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-
-        a.button:hover {
-            transform: translateY(-2px);
-            border-color: rgba(56, 189, 248, 0.6);
-            background: rgba(56, 189, 248, 0.08);
-            box-shadow: 0 14px 30px rgba(14, 165, 233, 0.25);
-        }
-
-        a.button.primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-            border: none;
-            color: #0b1224;
-            box-shadow: 0 14px 35px rgba(56, 189, 248, 0.45);
-        }
-
-        a.button.primary:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 16px 40px rgba(14, 165, 233, 0.55);
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'home.css' %}">
 </head>
 <body>
     <main>
@@ -106,7 +18,7 @@
             <a class="button" href="https://github.com/riley0131" target="_blank" rel="noreferrer noopener">
                 GitHub
             </a>
-            <a class="button" href="mailto:riley0131@hotmail.com" target="_blank" rel=""noreferrer noopener">
+            <a class="button" href="mailto:riley0131@hotmail.com" target="_blank" rel="noreferrer noopener">
                 Email
             </a>
         </div>
