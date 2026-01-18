@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: roshea
+    env: python
+    buildCommand: pip install -r requirements.txt && python roshea/manage.py collectstatic --noinput
+    startCommand: gunicorn roshea.wsgi:application
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
