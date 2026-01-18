@@ -1,0 +1,619 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Riley O’Shea — Software Engineer Portfolio" />
+  <title>Riley O’Shea | Portfolio</title>
+
+  <!-- Fonts: modern pairing with reliable fallbacks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'homePage/styles.css' %}" />
+</head>
+
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Header & Navigation -->
+  <header class="nav" role="banner">
+    <div class="container nav-inner">
+      <a class="brand" href="#top" aria-label="Go to top">
+        <span class="brand-name">Riley O’Shea</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary">
+        <a class="nav-link active" href="#top">Home</a>
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#experience">Experience</a>
+
+        <div class="dropdown" id="projectsDropdown">
+          <button class="dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="projectsMenu">
+            Projects
+            <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <div class="dropdown-menu" id="projectsMenu" role="menu" aria-label="Projects">
+            <a class="dropdown-item" href="#project-travel" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </span>
+              <span>
+                <strong>AI Powered Travel Planning App</strong>
+                <span>Django + OpenAI-powered itinerary generation.</span>
+              </span>
+            </a>
+
+            <a class="dropdown-item" href="#project-encrypted" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M6 10h12v10H6V10Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M12 14v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>
+                <strong>Encrypted Messaging System</strong>
+                <span>Secure communication patterns and key handling.</span>
+              </span>
+            </a>
+
+            <a class="dropdown-item" href="#project-caption" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M8 10h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M8 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>
+                <strong>Closed Captioning Audit System</strong>
+                <span>Automated compliance checks and reporting.</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <a class="nav-link" href="#skills">Skills</a>
+        <a class="nav-link" href="#education">Education</a>
+        <a class="nav-link" href="#connect">Connect</a>
+      </nav>
+
+      <button class="menu-btn" type="button" id="menuBtn" aria-label="Open menu" aria-controls="mobilePanel" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile panel -->
+    <div class="mobile-panel" id="mobilePanel" aria-label="Mobile navigation">
+      <div class="container mobile-inner">
+        <a class="nav-link" href="#top">Home</a>
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#experience">Experience</a>
+
+        <div class="dropdown" id="projectsDropdownMobile">
+          <button class="dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="projectsMenuMobile">
+            Projects
+            <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <div class="dropdown-menu" id="projectsMenuMobile" role="menu" aria-label="Projects">
+            <a class="dropdown-item" href="#project-travel" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2" />
+                </svg>
+              </span>
+              <span>
+                <strong>AI Powered Travel Planning App</strong>
+                <span>Django + OpenAI-powered itinerary generation.</span>
+              </span>
+            </a>
+
+            <a class="dropdown-item" href="#project-encrypted" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M6 10h12v10H6V10Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M12 14v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>
+                <strong>Encrypted Messaging System</strong>
+                <span>Secure communication patterns and key handling.</span>
+              </span>
+            </a>
+
+            <a class="dropdown-item" href="#project-caption" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M8 10h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M8 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span>
+                <strong>Closed Captioning Audit System</strong>
+                <span>Automated compliance checks and reporting.</span>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <a class="nav-link" href="#skills">Skills</a>
+        <a class="nav-link" href="#education">Education</a>
+        <a class="nav-link" href="#connect">Connect</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="kicker">
+            <span class="kicker-dot" aria-hidden="true"></span>
+            Software Engineering • IT • Accessibility • Security-minded
+          </div>
+
+          <h1>
+            Building <span class="gradient-name">clean, reliable</span> systems with a focus on usability and security.
+          </h1>
+
+          <p class="lead">
+            I’m Riley O’Shea — a Computer Science graduate from the University of Colorado Colorado Springs with a focus on cybersecurity and software engineering.
+            I build maintainable applications, automate high-impact workflows, and ship practical solutions that improve accessibility and reliability.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#connect">
+              Connect With Me
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+
+            <a class="btn" href="#projects" id="viewProjectsBtn">
+              View Projects
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Quick highlights">
+          <div class="card-inner">
+            <p class="section-sub" style="margin:0 0 0.75rem;">Areas I work in and outcomes I aim for.</p>
+
+            <div class="stat-grid">
+              <div class="stat">
+                <p class="label">Core Focus</p>
+                <p class="value">Automation & Web Apps</p>
+              </div>
+              <div class="stat">
+                <p class="label">Accessibility</p>
+                <p class="value">WCAG-aware Delivery</p>
+              </div>
+              <div class="stat">
+                <p class="label">Security Lens</p>
+                <p class="value">Secure Systems Thinking</p>
+              </div>
+              <div class="stat">
+                <p class="label">Cert</p>
+                <p class="value">Security+ (in progress)</p>
+              </div>
+            </div>
+
+            <div class="pill-row" aria-label="Skills">
+              <span class="pill">Python</span>
+              <span class="pill">Django</span>
+              <span class="pill">APIs</span>
+              <span class="pill">Docker</span>
+              <span class="pill">CI/CD</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>About</h2>
+            <p class="section-sub">
+              Alumni from the University of Colorado Colorado Springs (B.A. Computer Science). Specializing in cybersecurity and software engineering, with a track record of building secure, practical tools that improve accessibility and operational efficiency.
+            </p>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <h3 class="panel-title">What I do</h3>
+            <ul class="bullets">
+              <li>Design and deliver maintainable software products with an emphasis on reliability and security.</li>
+              <li>Automate repetitive technical workflows (auditing, reporting, and systems validation) to reduce manual effort.</li>
+              <li>Document processes clearly to enable consistent operations and faster onboarding.</li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <h3 class="panel-title">Highlights</h3>
+            <ul class="bullets">
+              <li><strong>Student Employee of the Year Nominee (2024–2025)</strong> at UCCS.</li>
+              <li>Built a Python-based caption auditing tool integrated into the university LMS.</li>
+              <li>Currently pursuing <strong>CompTIA Security+</strong> (expected February 2026).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Experience</h2>
+            <p class="section-sub">Hands-on IT and accessibility work focused on end-user support, automation, and compliance.</p>
+          </div>
+        </div>
+
+        <article class="timeline">
+          <div class="timeline-card">
+            <div class="timeline-top">
+              <div>
+                <h3 class="timeline-role">Assistive Technology Lab Assistant</h3>
+                <p class="timeline-org">UCCS Information Technology</p>
+              </div>
+              <div class="timeline-meta">
+                <span class="chip">Jul 2023 – Dec 2025</span>
+                <span class="chip">Colorado Springs, CO</span>
+              </div>
+            </div>
+
+            <ul class="bullets">
+              <li>Engineered a Python-based auditing tool integrated into the university LMS to verify closed captioning availability, improving auditing efficiency and accessibility support.</li>
+              <li>Developed Windows images for assistive technology lab systems with specialized software (JAWS, NVDA, Dragon Naturally Speaking, Read &amp; Write) to expand access to accommodations.</li>
+              <li>Provided specialized training and technical support for accessibility tools and general computer support for registered students.</li>
+              <li>Authored step-by-step guides and FAQs for assistive technology procedures to accelerate onboarding and reduce repeat issues.</li>
+              <li>Served as Digital Accessibility Student Advisor, collaborating on campus audits to align with WCAG 2.1 guidelines.</li>
+            </ul>
+
+            <div class="callout">
+              <strong>Recognition:</strong> Nominee — University of Colorado Colorado Springs Student Employee of the Year (2024–2025)
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Projects</h2>
+            <p class="section-sub">Check out some of my recent projects.</p>
+          </div>
+        </div>
+
+        <div class="project-grid">
+          <article class="project" id="project-travel">
+            <div class="project-top">
+              <h3>AI Powered Travel Planning App</h3>
+              <span class="tag">Django</span>
+              <span class="tag">OpenAI API</span>
+              <span class="tag">CI/CD</span>
+            </div>
+            <p class="project-desc">
+              Django application that uses the OpenAI GPT-5 API to generate personalized travel itineraries. Includes a CI/CD pipeline with regression testing and separate testing/production environments.
+            </p>
+            <div class="project-actions">
+              <a class="linkchip" href="#connect">Discuss this project</a>
+              <a class="linkchip" href="https://www.wanderly.social/" target="_blank" rel="noopener noreferrer">Check it out</a>
+            </div>
+          </article>
+
+          <article class="project" id="project-encrypted">
+            <div class="project-top">
+              <h3>Encrypted Messaging System</h3>
+              <span class="tag">Security</span>
+              <span class="tag">Cryptography</span>
+              <span class="tag">Systems</span>
+            </div>
+            <p class="project-desc">
+              A secure messaging system implementing end-to-end encryption, secure key exchange, and robust authentication mechanisms. Focuses on protecting user data and ensuring confidentiality.
+            </p>
+            <div class="project-actions">
+              <a class="linkchip" href="#connect">Request details</a>
+              <a class="linkchip" href="https://github.com/Riley0131/Encrypted-Messenger/" target="_blank" rel="noopener noreferrer">Check it out on GitHub</a>
+            </div>
+          </article>
+
+          <article class="project" id="project-caption">
+            <div class="project-top">
+              <h3>Closed Captioning Audit System</h3>
+              <span class="tag">Python</span>
+              <span class="tag">Canvas API</span>
+              <span class="tag">YouTube API</span>
+            </div>
+            <p class="project-desc">
+              Python application integrating Canvas, YouTube, and other APIs to audit course videos for caption compliance. Streamlines auditing through automated collection and reporting.
+            </p>
+            <div class="project-actions">
+              <a class="linkchip" href="#connect">Discuss accessibility tooling</a>
+              <a class="linkchip" href="https://github.com/Riley0131/Canvas-Closed-Captioning-Audit-Tool" target="_blank" rel="noopener noreferrer">Check it out on GitHub</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Skills</h2>
+            <p class="section-sub">A concise view of core technical capabilities and tooling.</p>
+          </div>
+        </div>
+
+        <div class="skills-grid">
+          <div class="panel">
+            <h3 class="panel-title">Programming</h3>
+            <div class="pill-row" aria-label="Programming languages">
+              <span class="pill">Python</span>
+              <span class="pill">Java</span>
+              <span class="pill">C</span>
+              <span class="pill">C#</span>
+              <span class="pill">C++</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 class="panel-title">Development</h3>
+            <div class="pill-row" aria-label="Development tools">
+              <span class="pill">Git</span>
+              <span class="pill">GitHub</span>
+              <span class="pill">Unix</span>
+              <span class="pill">OOP</span>
+              <span class="pill">Data Structures &amp; Algorithms</span>
+              <span class="pill">Unit Testing</span>
+              <span class="pill">Agile</span>
+              <span class="pill">Docker</span>
+              <span class="pill">Kubernetes</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 class="panel-title">Networking &amp; Cloud</h3>
+            <div class="pill-row" aria-label="Networking and cloud">
+              <span class="pill">Secure Network Design</span>
+              <span class="pill">AWS</span>
+              <span class="pill">Azure</span>
+              <span class="pill">Secure Cloud Computing</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 class="panel-title">IT Operations</h3>
+            <div class="pill-row" aria-label="IT operations">
+              <span class="pill">Windows Imaging</span>
+              <span class="pill">Remote Desktop</span>
+              <span class="pill">Virtual Machines</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section id="education">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Education</h2>
+            <p class="section-sub">Academic foundation and credentials.</p>
+          </div>
+        </div>
+
+        <div class="education-card">
+          <div class="education-top">
+            <div>
+              <h3>University of Colorado Colorado Springs</h3>
+              <p class="muted">Bachelor of Arts in Computer Science (ABET Accredited) • Minor in Criminal Justice</p>
+            </div>
+            <div class="timeline-meta">
+              <span class="chip">Dec 2025</span>
+              <span class="chip">GPA 3.48/4.0</span>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Certification:</strong> CompTIA Security+ in progress (expected February 2026)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECT -->
+    <section id="connect" aria-label="Connect With Me">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Connect With Me</h2>
+            <p class="section-sub">The fastest ways to reach me or review my work.</p>
+          </div>
+        </div>
+
+        <div class="cards">
+          <!-- LinkedIn -->
+          <a class="card" href="https://linkedin.com/in/osheariley" target="_blank" rel="noopener noreferrer" aria-label="Open LinkedIn profile">
+            <div class="card-top">
+              <div class="icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M6.5 9.5V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M6.5 6.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                  <path d="M10.5 18v-5.2c0-1.8 1-3 2.7-3 1.6 0 2.3 1.1 2.3 3V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M15.5 12.2c0-1.7.9-2.4 2.3-2.4 1.5 0 2.7 1 2.7 3V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div>
+                <h3>LinkedIn</h3>
+                <p class="handle">osheariley</p>
+              </div>
+            </div>
+            <div class="cta-row">
+              <span>Professional profile</span>
+              <span class="linkchip">Visit
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M10 7h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </a>
+
+          <!-- GitHub -->
+          <a class="card" href="https://github.com/riley0131" target="_blank" rel="noopener noreferrer" aria-label="Open GitHub profile">
+            <div class="card-top">
+              <div class="icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2.75c-5.1 0-9.25 4.15-9.25 9.27 0 4.1 2.66 7.58 6.34 8.81.46.08.63-.2.63-.45v-1.63c-2.58.57-3.12-1.1-3.12-1.1-.42-1.08-1.02-1.37-1.02-1.37-.84-.58.06-.57.06-.57.93.07 1.42.96 1.42.96.83 1.43 2.18 1.02 2.71.78.08-.6.32-1.02.58-1.25-2.06-.24-4.22-1.04-4.22-4.6 0-1.02.36-1.86.96-2.52-.1-.24-.42-1.2.1-2.5 0 0 .78-.25 2.56.97.74-.21 1.53-.31 2.32-.31.79 0 1.58.1 2.32.31 1.78-1.22 2.56-.97 2.56-.97.52 1.3.2 2.26.1 2.5.6.66.96 1.5.96 2.52 0 3.58-2.17 4.36-4.24 4.6.33.29.62.85.62 1.73v2.56c0 .25.17.53.64.44 3.67-1.24 6.32-4.71 6.32-8.8C21.25 6.9 17.1 2.75 12 2.75Z" stroke="currentColor" stroke-width="1.6" />
+                </svg>
+              </div>
+              <div>
+                <h3>GitHub</h3>
+                <p class="handle">riley0131</p>
+              </div>
+            </div>
+            <div class="cta-row">
+              <span>Code & projects</span>
+              <span class="linkchip">View
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M10 7h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </a>
+
+          <!-- Email -->
+          <a class="card" href="mailto:riley0131@hotmail.com" aria-label="Email Riley">
+            <div class="card-top">
+              <div class="icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M4.5 7.5 12 13l7.5-5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <h3>Email</h3>
+                <p class="handle">riley0131@hotmail.com</p>
+              </div>
+            </div>
+            <div class="cta-row">
+              <span>Direct message</span>
+              <span class="linkchip">Send
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M10 7h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container foot">
+        <p class="tiny">© <span id="year"></span> Riley O’Shea. All rights reserved.</p>
+        <p class="tiny">Built with semantic HTML and responsive CSS.</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function(){
+      const year = document.getElementById('year');
+      if (year) year.textContent = new Date().getFullYear();
+
+      // Desktop dropdown: click-to-toggle (still supports hover via CSS).
+      const dd = document.getElementById('projectsDropdown');
+      const trigger = dd?.querySelector('.dropdown-trigger');
+
+      function closeDesktopDropdown(){
+        dd?.classList.remove('open');
+        trigger?.setAttribute('aria-expanded', 'false');
+      }
+
+      trigger?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = dd.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dd) return;
+        if (dd.contains(e.target)) return;
+        closeDesktopDropdown();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDesktopDropdown();
+      });
+
+      // Mobile menu toggle
+      const menuBtn = document.getElementById('menuBtn');
+      const mobilePanel = document.getElementById('mobilePanel');
+
+      function closeMobilePanel(){
+        mobilePanel?.classList.remove('open');
+        menuBtn?.setAttribute('aria-expanded', 'false');
+      }
+
+      menuBtn?.addEventListener('click', () => {
+        const isOpen = mobilePanel.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      // Mobile projects dropdown
+      const ddM = document.getElementById('projectsDropdownMobile');
+      const triggerM = ddM?.querySelector('.dropdown-trigger');
+
+      triggerM?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = ddM.classList.toggle('open');
+        triggerM.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      // Close mobile panel when any nav link is clicked
+      mobilePanel?.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (!a) return;
+        closeMobilePanel();
+      });
+    })();
+  </script>
+</body>
+</html>
