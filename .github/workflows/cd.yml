@@ -1,0 +1,27 @@
+name: CD-Pipeline
+
+on:
+  pull_request:
+    types:
+      - closed   # triggers when PR is closed (merged OR just closed)
+    branches:
+      - main
+
+env:
+  PYTHON_VERSION: "3.12"
+  PROJECT_DIR: Roshea
+
+jobs:
+
+  cd-pipeline-deploy:
+    runs-on: ubuntu-latest
+    # Only run if the PR was actually merged into main
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Trigger Render deploy via Deploy Hook
+        run: |
+          echo "Triggering Render deploy..."
+          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
